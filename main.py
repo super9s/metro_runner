@@ -20,17 +20,19 @@ botFlags = BotFlags()
 
 client = discord.Client(intents=intents)
 
-adminIdList = [
-    965827889499078656, # zkr
-    345342072045174795, # みなと
-]
-
-adminNames = {
+AdminList = {
     965827889499078656: "zkr",
     345342072045174795: "みなと"
 }
 
 PREFIX = "m."
+
+async def checkAdmin(msg):
+    if not (msg.author.id in AdminList.keys()):
+        await msg.reply("`権限が必要なコマンドだよ`")
+        return False
+
+    return True
 
 @client.event
 async def on_ready():
@@ -86,8 +88,7 @@ async def on_message(msg):
             )
 
         elif com == "resume":
-            if not (msg.author.id in adminIdList):
-                await msg.reply("`権限が必要なコマンドだよ`")
+            if not checkAdmin(msg):
                 return
 
             if not botFlags.isPaused:
@@ -97,14 +98,13 @@ async def on_message(msg):
                 await msg.reply("解除しました")
 
         elif com == "oplist":
-            await msg.reply("\n".join(adminNames.values()))
+            await msg.reply("\n".join(AdminList.values()))
 
         elif botFlags.isPaused:
             return
 
         elif com == "pause":
-            if not (msg.author.id in adminIdList):
-                await msg.reply("`権限が必要なコマンドだよ`")
+            if not checkAdmin(msg):
                 return
             
             botFlags.isPaused = True
@@ -112,10 +112,9 @@ async def on_message(msg):
             return
         
         elif com == "update":
-            if not (msg.author.id in adminIdList):
-                await msg.reply("`権限が必要なコマンドだよ`")
+            if not checkAdmin(msg):
                 return
-            
+
             os.system("./update.sh")
             await msg.reply("実行ファイルを更新しました")
 
